@@ -100,7 +100,15 @@ class _GameViewState extends State<GameView> {
   double get _size => (_game.n + 4) * 25;
 
   void _onCellOpen(Cell cell) {
-    Log.debug("Opening ${cell.y} ${cell.x} ${cell.isOpen}");
+    Log.debug(
+        "Opening ${cell.y} ${cell.x} isOpen=${cell.isOpen} isHole=${cell.isHole}");
+    if (!_game.isStarted) {
+      GameService().start(_game);
+      _openNeigbours(cell);
+      _openedCellsCount++;
+      return;
+    }
+
     if (cell.isHole) {
       _onGameLose();
       return;
@@ -116,6 +124,7 @@ class _GameViewState extends State<GameView> {
   }
 
   void _onGameLose() {
+    Log.info("On game lose _game.holes=${_game.holes.length}");
     for (var hole in _game.holes) {
       hole.isOpen = true;
       setState(() {
@@ -162,7 +171,6 @@ class _GameViewState extends State<GameView> {
   void _openCell(int x, int y) {
     if (y >= 0 && y < _game.n && x >= 0 && x < _game.n) {
       Cell cell = _game.cell(x, y);
-
       if (!cell.isHole && !cell.isOpen) {
         cell.isOpen = true;
         _onCellOpen(cell);

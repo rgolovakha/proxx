@@ -2,13 +2,22 @@ import '../models/game.dart';
 import '../models/cell.dart';
 import 'dart:math';
 
+import '../utils/log.dart';
+
 class GameService {
   Game create(int n, int holesCount) {
     List<List<Cell>> board =
         List.generate(n, (y) => List.generate(n, (x) => Cell(x, y)));
-    _setRandomHoles(board, holesCount);
-    Game game = Game(board);
+    // _setRandomHoles(board, holesCount);
+    Game game = Game(board, holesCount);
     return game;
+  }
+
+  void start(Game game) {
+    Log.info("Starting the game holesCount=${game.holesCount}");
+    _setRandomHoles(game.board, game.holesCount);
+    game.setHoles();
+    game.isStarted = true;
   }
 
   void _setRandomHoles(List<List<Cell>> board, int holesCount) {
@@ -17,7 +26,7 @@ class GameService {
       int x = Random().nextInt(n);
       int y = Random().nextInt(n);
       Cell cell = board[y][x];
-      if (!cell.isHole) {
+      if (!cell.isHole && !cell.isOpen) {
         cell.isHole = true;
         _calculateHoleTips(cell, board);
         holesCount--;
